@@ -170,27 +170,53 @@ nvm() {
       echo "Node Version Manager"
       echo
       echo "Usage:"
-      echo "    nvm help                    Show this message"
-      echo "    nvm install [-s] <version>  Download and install a <version>"
-      echo "    nvm uninstall <version>     Uninstall a version"
-      echo "    nvm use <version>           Modify PATH to use <version>"
-      echo "    nvm run <version> [<args>]  Run <version> with <args> as arguments"
-      echo "    nvm ls                      List installed versions"
-      echo "    nvm ls <version>            List versions matching a given description"
-      echo "    nvm ls-remote               List remote versions available for install"
-      echo "    nvm deactivate              Undo effects of NVM on current shell"
-      echo "    nvm alias [<pattern>]       Show all aliases beginning with <pattern>"
-      echo "    nvm alias <name> <version>  Set an alias named <name> pointing to <version>"
-      echo "    nvm unalias <name>          Deletes the alias named <name>"
-      echo "    nvm copy-packages <version> Install global NPM packages contained in <version> to current version"
-      echo
-      echo "Example:"
-      echo "    nvm install v0.4.12         Install a specific version number"
-      echo "    nvm use 0.2                 Use the latest available 0.2.x release"
-      echo "    nvm run 0.4.12 myApp.js     Run myApp.js using node v0.4.12"
-      echo "    nvm alias default 0.4       Auto use the latest installed v0.4.x version"
+      echo "    nvm help                        Show this message"
+      echo "    nvm deploy <version> <archive>  Deploy node <version> from <archive>"
+      echo "    nvm install [-s] <version>      Download and install a <version>"
+      echo "    nvm uninstall <version>         Uninstall a version"
+      echo "    nvm use <version>               Modify PATH to use <version>"
+      echo "    nvm run <version> [<args>]      Run <version> with <args> as arguments"
+      echo "    nvm ls                          List installed versions"
+      echo "    nvm ls <version>                List versions matching a given description"
+      echo "    nvm ls-remote                   List remote versions available for install"
+      echo "    nvm deactivate                  Undo effects of NVM on current shell"
+      echo "    nvm alias [<pattern>]           Show all aliases beginning with <pattern>"
+      echo "    nvm alias <name> <version>      Set an alias named <name> pointing to <version>"
+      echo "    nvm unalias <name>              Deletes the alias named <name>"
+      echo "    nvm copy-packages <version>     Install global NPM packages contained in <version> to current version"
+      echo                                      
+      echo "Example:"                           
+      echo "    nvm install v0.4.12             Install a specific version number"
+      echo "    nvm use 0.2                     Use the latest available 0.2.x release"
+      echo "    nvm run 0.4.12 myApp.js         Run myApp.js using node v0.4.12"
+      echo "    nvm alias default 0.4           Auto use the latest installed v0.4.x version"
       echo
     ;;
+
+		"deploy" )
+      if [ $# -lt 3 ]; then
+        nvm help
+        return
+      fi
+			VERSION=$2
+			local archive=$3
+      local tmpdir="$NVM_DIR/bin/node-${VERSION}"
+
+      [ -d "$NVM_DIR/$VERSION" ] && echo "$VERSION is already installed." && return
+			[ ! -e "$archive" ] && echo "Archive $archive not found!" && return
+			
+      if (
+        mkdir -p "$tmpdir" && \
+        tar -xzf "$archive" -C "$tmpdir" --strip-components 1 && \
+        mv "$tmpdir" "$NVM_DIR/$VERSION"
+        )
+      then
+        nvm use $VERSION
+        return;
+      else
+        echo "Deploy failed."
+      fi
+		;;
 
     "install" )
       # initialize local variables
